@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover lets the page use the full phone screen; safe areas are handled in CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FBE8EE">
+  <title>A little something for you</title>
+
+  <!-- Fonts are optional: if they cannot load, elegant system fallbacks take over (see style.css) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Dancing+Script:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body data-state="loading">
+
+  <noscript>
+    <p class="noscript">This little gift needs JavaScript to be turned on. Please enable it and reload the page.</p>
+  </noscript>
+
+  <!-- Hidden SVG sprite: small reusable tulip drawings -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="tulip-mini" viewBox="70 44 160 240">
+        <path d="M150 276 C146 236 154 196 150 150" stroke="#7F9777" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M148 272 C100 254 70 204 72 150 C108 172 140 218 148 272Z" fill="#91A889"/>
+        <path d="M152 272 C200 256 232 214 232 164 C196 184 160 224 152 272Z" fill="#A5B99D"/>
+        <path d="M150 164 C110 154 102 104 118 62 C136 82 148 110 150 164Z" fill="#B84F76"/>
+        <path d="M150 164 C190 154 198 104 182 62 C164 82 152 110 150 164Z" fill="#B84F76"/>
+        <path d="M150 170 C106 164 98 108 150 54 C202 108 194 164 150 170Z" fill="#D96C91"/>
+        <path d="M150 74 C128 100 128 135 142 154" stroke="#FFFFFF" stroke-opacity="0.38" stroke-width="5" fill="none" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="seal-tulip" viewBox="0 0 40 50">
+        <path d="M20 48 C19 40 21 34 20 28" stroke="#FFE9EF" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M20 44 C12 41 8 34 9 28 C15 31 19 37 20 44Z" fill="#FFE9EF" opacity="0.9"/>
+        <path d="M20 44 C28 41 32 34 31 28 C25 31 21 37 20 44Z" fill="#FFE9EF" opacity="0.9"/>
+        <path d="M20 30 C9 28 7 14 11 5 C16 10 19 18 20 30Z" fill="#FFE9EF" opacity="0.75"/>
+        <path d="M20 30 C31 28 33 14 29 5 C24 10 21 18 20 30Z" fill="#FFE9EF" opacity="0.75"/>
+        <path d="M20 31 C8 29 6 14 20 2 C34 14 32 29 20 31Z" fill="#FFF8F5"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Quiet, slow background petals (created by script.js) -->
+  <div class="petal-layer petal-layer--ambient" id="ambient" aria-hidden="true"></div>
+
+  <!-- Layer for celebration sparkles -->
+  <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+
+  <main id="app">
+
+    <!-- ============ STAGE 1: PUZZLE ============ -->
+    <section class="stage stage--puzzle no-select" id="stage-puzzle" aria-labelledby="puzzleTitle">
+      <div class="puzzle-card">
+        <h1 id="puzzleTitle" class="display" data-cfg="greeting"></h1>
+        <p class="lede" data-cfg="introText"></p>
+
+        <div class="puzzle-meta">
+          <figure class="preview">
+            <img id="previewImg" alt="Preview of the finished picture: a bouquet of pink tulips tied with a pink ribbon" width="96" height="96">
+            <figcaption>the finished flower</figcaption>
+          </figure>
+          <p class="howto" data-cfg="howToPlay"></p>
+        </div>
+
+        <div class="puzzle-board" id="puzzleBoard" role="group" aria-label="Tulip puzzle: a 3 by 3 grid of pieces"></div>
+
+        <div class="progress">
+          <div class="progress-track" id="progressTrack" role="progressbar" aria-label="Puzzle progress" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <p class="progress-text" id="progressText">0 of 9 pieces in place</p>
+        </div>
+
+        <p class="puzzle-banner" id="puzzleBanner" aria-hidden="true"></p>
+        <p class="sr-only" id="puzzleStatus" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2: "DO YOU WANT TO CONTINUE?" ============ -->
+    <section class="stage stage--question no-select" id="stage-question" aria-labelledby="questionTitle">
+      <div class="question-card" id="questionCard">
+        <svg class="card-tulip" aria-hidden="true" focusable="false"><use href="#tulip-mini"/></svg>
+        <h2 id="questionTitle" class="display question-text" data-cfg="questionText"></h2>
+        <div class="answers">
+          <button type="button" class="btn btn--yes" id="yesBtn" data-cfg="yesLabel"></button>
+          <span class="no-slot" id="noSlot">
+            <button type="button" class="btn btn--no" id="noBtn" data-cfg="noLabel"></button>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 3: TULIP REVEAL ============ -->
+    <section class="stage stage--reveal" id="stage-reveal" aria-label="A bouquet of tulips blooms">
+      <div class="reveal-bg" aria-hidden="true"></div>
+      <div class="petal-layer" id="revealPetals" aria-hidden="true"></div>
+      <svg class="reveal-scene" id="revealScene" viewBox="0 0 400 600" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false"></svg>
+      <p class="sr-only" id="revealStatus" role="status"></p>
+    </section>
+
+    <!-- ============ STAGES 4: CLOSED SCROLL / OPENING SCROLL ============ -->
+    <section class="stage stage--scroll no-select" id="stage-scroll" aria-label="A small scroll sealed with wax">
+      <div class="scroll-wrap">
+        <div class="scroll" id="scroll">
+          <div class="scroll-roll scroll-roll--top"></div>
+          <div class="scroll-paper">
+            <div class="paper-inner" aria-hidden="true">
+              <svg class="paper-tulip" focusable="false"><use href="#tulip-mini"/></svg>
+              <span class="line" style="--w:72%"></span>
+              <span class="line" style="--w:86%"></span>
+              <span class="line" style="--w:64%"></span>
+              <span class="line" style="--w:80%"></span>
+              <span class="line" style="--w:48%"></span>
+            </div>
+          </div>
+          <div class="scroll-roll scroll-roll--bottom"></div>
+          <div class="scroll-ribbon" aria-hidden="true"></div>
+          <button type="button" class="seal" id="seal" aria-label="Wax seal on the scroll. Tap it to break the seal.">
+            <svg class="seal-icon" aria-hidden="true" focusable="false"><use href="#seal-tulip"/></svg>
+          </button>
+        </div>
+        <p class="scroll-hint" id="scrollHint">the little seal is shimmering for a reason</p>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 5: THE LOVE LETTER ============ -->
+    <section class="stage stage--letter" id="stage-letter" aria-labelledby="letterGreeting">
+      <article class="letter" id="letter">
+        <svg class="corner corner--tl" aria-hidden="true" focusable="false"><use href="#tulip-mini"/></svg>
+        <svg class="corner corner--tr" aria-hidden="true" focusable="false"><use href="#tulip-mini"/></svg>
+        <svg class="corner corner--bl" aria-hidden="true" focusable="false"><use href="#tulip-mini"/></svg>
+        <svg class="corner corner--br" aria-hidden="true" focusable="false"><use href="#tulip-mini"/></svg>
+
+        <h2 class="letter-greeting reveal" id="letterGreeting"></h2>
+        <div class="letter-body" id="letterBody"></div>
+        <p class="letter-closing reveal" id="letterClosing"></p>
+        <p class="letter-signature reveal" id="letterSignature"></p>
+        <svg class="letter-tulip reveal" aria-hidden="true" focusable="false"><use href="#tulip-mini"/></svg>
+        <p class="letter-final reveal" id="letterFinal" hidden></p>
+        <div class="letter-actions reveal">
+          <button type="button" class="btn btn--ghost" id="replayBtn">Read it again ♡</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- ============ MUSIC CONTROL (always reachable) ============ -->
+  <button type="button" class="music-btn" id="musicBtn" aria-label="Background music" aria-pressed="false" title="Play music">
+    <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
+  <p class="music-note" id="musicNote" role="status" aria-live="polite"></p>
+
+</body>
+</html>
